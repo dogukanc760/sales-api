@@ -20,7 +20,7 @@ import { ProductCards } from './entities/product-cards.entity';
 
 // @ApiBearerAuth()
 // @Roles(RoleEnum.admin)
-// @UseGuards(AuthGuard('jwt'), RolesGuard)
+// @UseGuards(AuthGuard('jwt'),  RolesGuard)
 @ApiTags('Product Cards')
 @Controller({
   path: 'product-cards',
