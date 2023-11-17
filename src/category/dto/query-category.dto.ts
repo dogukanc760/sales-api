@@ -6,7 +6,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Transform, Type, plainToInstance } from 'class-transformer';
-import { Category } from '../entities/Category.entity';
+import { Category } from '../entities/category.entity';
 
 export class FilterCategoryDto {
   @IsOptional()

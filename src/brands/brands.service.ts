@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { EntityCondition } from 'src/utils/types/entity-condition.type';
 import { NullableType } from 'src/utils/types/nullable.type';
 import { IPaginationOptions } from 'src/utils/types/pagination-options';
-import { CreateBrandDto } from './dto/create-Brand.dto';
+import { CreateBrandDto } from './dto/create-brand.dto';
 import { FilterBrandDto, SortBrandDto } from './dto/query-Brand.dto';
 import { Brand } from './entities/Brand.entity';
 
