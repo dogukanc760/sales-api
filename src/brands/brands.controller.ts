@@ -13,8 +13,8 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 import { NullableType } from 'src/utils/types/nullable.type';
 import { BrandsService } from './brands.service';
-import { QueryBrandDto } from './dto/query-Brand.dto';
-import { CreateBrandDto } from './dto/create-Brand.dto';
+import { QueryBrandDto } from './dto/query-brand.dto';
+import { CreateBrandDto } from './dto/create-brand.dto';
 import { UpdateBrandDto } from './dto/update-brand.dto';
 import { Brand } from './entities/brand.entity';
 

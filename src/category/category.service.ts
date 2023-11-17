@@ -6,7 +6,7 @@ import { NullableType } from 'src/utils/types/nullable.type';
 import { IPaginationOptions } from 'src/utils/types/pagination-options';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { FilterCategoryDto, SortCategoryDto } from './dto/query-category.dto';
-import { Category } from './entities/Category.entity';
+import { Category } from './entities/category.entity';
 
 @Injectable()
 export class CategoryService {
