@@ -11,7 +11,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
-import { QueryProductDto } from './dto/query-product.dto';
+import { QueryProductDto, QueryProductViewDto } from './dto/query-product.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { CreateProductDto } from './dto/create-product.dto';
 import { Products } from './entities/product.entity';
@@ -47,6 +47,29 @@ export class ProductsController {
     return {
       totalCount: products[1],
       products: products[0],
+    };
+  }
+
+  @Get('/view')
+  public async getProductsView(
+    @Query() query: QueryProductViewDto,
+  ): Promise<any> {
+    const page = query?.page ?? 1;
+    let limit = query?.limit ?? 10;
+    if (limit > 50) {
+      limit = 50;
+    }
+    const products = await this.productService.findManyWithPaginationView({
+      filterOptions: query?.filters,
+      sortOptions: query?.sort,
+      paginationOptions: {
+        page,
+        limit,
+      },
+    });
+    return {
+      products: products.products,
+      totalCount: products.totalCount,
     };
   }
 

@@ -10,9 +10,14 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityCondition } from 'src/utils/types/entity-condition.type';
 import { NullableType } from 'src/utils/types/nullable.type';
-import { FilterProductDto, SortProductDto } from './dto/query-product.dto';
+import {
+  FilterProductDto,
+  SortProductDto,
+  SortProductViewDto,
+} from './dto/query-product.dto';
 import { IPaginationOptions } from 'src/utils/types/pagination-options';
 import { CreateProductDto } from './dto/create-product.dto';
+import { productListViewQuery } from 'src/utils/queries/product-queries';
 
 @Injectable()
 export class ProductsService {
@@ -68,6 +73,13 @@ export class ProductsService {
         {},
       ),
       where: {},
+      // join: {
+      //   alias: 'attendance',
+      //   leftJoinAndSelect: {
+      //     user: 'attendance.user',
+      //     outlet: 'attendance.outlet',
+      //   },
+      // },
     };
     findOption.withDeleted = false;
     if (filterOptions?.barcode) {
@@ -105,6 +117,85 @@ export class ProductsService {
     }
 
     return this.productRepository.findAndCount(findOption);
+  }
+
+  async findManyWithPaginationView({
+    filterOptions,
+    sortOptions,
+    paginationOptions,
+  }: {
+    filterOptions?: FilterProductDto | null;
+    sortOptions?: SortProductViewDto[] | null;
+    paginationOptions: IPaginationOptions;
+  }) {
+    let totalCountQuery: string = '';
+    let baseQuery = productListViewQuery() + ` where "deletedAt" is null`;
+    if (filterOptions?.barcode) {
+      baseQuery += ` and barcode = '${filterOptions.barcode}'`;
+    }
+
+    if (filterOptions?.productCardId) {
+      baseQuery += ` and product_card_id='${filterOptions.productCardId}'`;
+    }
+
+    if (filterOptions?.categoryId) {
+      baseQuery += ` and category_id='${filterOptions.categoryId}'`;
+    }
+
+    if (filterOptions?.productName) {
+      baseQuery += ` and "productName" ilike '%${filterOptions.productName}%'`;
+    }
+
+    if (filterOptions?.brand) {
+      baseQuery += ` and brand_id='${filterOptions.brand}'`;
+    }
+
+    if (filterOptions?.unitType) {
+      baseQuery += ` and "unitType"='${filterOptions.unitType}'`;
+    }
+
+    if (filterOptions?.showOnSellScreen) {
+      baseQuery += ` and "showOnSellScreen"=${filterOptions.showOnSellScreen}`;
+    }
+    if (typeof sortOptions === 'undefined') {
+      baseQuery += ` 
+    order by "createdAt" desc 
+    offset ${(paginationOptions.page - 1) * paginationOptions.limit} limit ${
+      paginationOptions.limit
+    } `;
+
+      totalCountQuery = baseQuery.replace(
+        `  order by "createdAt" desc 
+    offset ${(paginationOptions.page - 1) * paginationOptions.limit} limit ${
+      paginationOptions.limit
+    } `,
+        '',
+      );
+      totalCountQuery = totalCountQuery.replace('*', 'Count(*)');
+    } else {
+      baseQuery += ` 
+    order by ${sortOptions![0].orderBy} ${sortOptions![0].order} 
+    offset ${(paginationOptions.page - 1) * paginationOptions.limit} limit ${
+      paginationOptions.limit
+    } `;
+      totalCountQuery = baseQuery.replace(
+        ` order by  ${sortOptions![0].orderBy} ${sortOptions![0].order} 
+    offset ${(paginationOptions.page - 1) * paginationOptions.limit} limit ${
+      paginationOptions.limit
+    } `,
+        '',
+      );
+      totalCountQuery = totalCountQuery.replace('*', 'Count(*)');
+    }
+    console.log('dodo', baseQuery);
+    const products = await this.productRepository.query(baseQuery);
+
+    const totalCount = await this.productRepository.query(totalCountQuery);
+
+    return {
+      products,
+      totalCount: Number(totalCount[0].count),
+    };
   }
 
   findOne(fields: EntityCondition<Products>): Promise<NullableType<Products>> {

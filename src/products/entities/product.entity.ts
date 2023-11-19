@@ -20,6 +20,7 @@ export class Products extends EntityHelper {
 
   @Index()
   @Column({ type: String, nullable: true })
+  // @ManyToOne((type) => Category, (category) => category.id)
   categoryId: string | null;
 
   @Column({ type: String, nullable: true })
