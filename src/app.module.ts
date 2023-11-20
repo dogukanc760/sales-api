@@ -37,6 +37,9 @@ import { ReportsModule } from './reports/reports.module';
 import { ToolsModule } from './tools/tools.module';
 import { AppManagementModule } from './app-management/app-management.module';
 import { CategoryModule } from './category/category.module';
+import { SalesDetailModule } from './sales-detail/sales-detail.module';
+import { DictionaryModule } from './dictionary/dictionary.module';
+import { DynamicReportsModule } from './dynamic-reports/dynamic-reports.module';
 
 @Module({
   imports: [
@@ -105,6 +108,9 @@ import { CategoryModule } from './category/category.module';
     ToolsModule,
     AppManagementModule,
     CategoryModule,
+    SalesDetailModule,
+    DictionaryModule,
+    DynamicReportsModule,
   ],
 })
 export class AppModule {}
