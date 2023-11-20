@@ -128,68 +128,47 @@ export class ProductsService {
     sortOptions?: SortProductViewDto[] | null;
     paginationOptions: IPaginationOptions;
   }) {
-    let totalCountQuery: string = '';
-    let baseQuery = productListViewQuery() + ` where "deletedAt" is null`;
-    if (filterOptions?.barcode) {
-      baseQuery += ` and barcode = '${filterOptions.barcode}'`;
+    const whereConditions: string[] = ['"deletedAt" is null'];
+
+    if (filterOptions) {
+      const {
+        barcode,
+        productCardId,
+        categoryId,
+        productName,
+        brand,
+        unitType,
+        showOnSellScreen,
+      } = filterOptions;
+
+      barcode && whereConditions.push(`barcode = '${barcode}'`);
+      productCardId &&
+        whereConditions.push(`product_card_id = '${productCardId}'`);
+      categoryId && whereConditions.push(`category_id = '${categoryId}'`);
+      productName &&
+        whereConditions.push(`"productName" ilike '%${productName}%'`);
+      brand && whereConditions.push(`brand_id = '${brand}'`);
+      unitType && whereConditions.push(`"unitType" = '${unitType}'`);
+      showOnSellScreen &&
+        whereConditions.push(`"showOnSellScreen" = ${showOnSellScreen}`);
     }
 
-    if (filterOptions?.productCardId) {
-      baseQuery += ` and product_card_id='${filterOptions.productCardId}'`;
-    }
+    const orderClause = sortOptions
+      ? `order by ${sortOptions[0].orderBy} ${sortOptions[0].order}`
+      : `order by "createdAt" desc`;
 
-    if (filterOptions?.categoryId) {
-      baseQuery += ` and category_id='${filterOptions.categoryId}'`;
-    }
-
-    if (filterOptions?.productName) {
-      baseQuery += ` and "productName" ilike '%${filterOptions.productName}%'`;
-    }
-
-    if (filterOptions?.brand) {
-      baseQuery += ` and brand_id='${filterOptions.brand}'`;
-    }
-
-    if (filterOptions?.unitType) {
-      baseQuery += ` and "unitType"='${filterOptions.unitType}'`;
-    }
-
-    if (filterOptions?.showOnSellScreen) {
-      baseQuery += ` and "showOnSellScreen"=${filterOptions.showOnSellScreen}`;
-    }
-    if (typeof sortOptions === 'undefined') {
-      baseQuery += ` 
-    order by "createdAt" desc 
+    const baseQuery = `${productListViewQuery()} where ${whereConditions.join(
+      ' and ',
+    )} ${orderClause}
     offset ${(paginationOptions.page - 1) * paginationOptions.limit} limit ${
       paginationOptions.limit
-    } `;
+    }`;
 
-      totalCountQuery = baseQuery.replace(
-        `  order by "createdAt" desc 
-    offset ${(paginationOptions.page - 1) * paginationOptions.limit} limit ${
-      paginationOptions.limit
-    } `,
-        '',
-      );
-      totalCountQuery = totalCountQuery.replace('*', 'Count(*)');
-    } else {
-      baseQuery += ` 
-    order by ${sortOptions![0].orderBy} ${sortOptions![0].order} 
-    offset ${(paginationOptions.page - 1) * paginationOptions.limit} limit ${
-      paginationOptions.limit
-    } `;
-      totalCountQuery = baseQuery.replace(
-        ` order by  ${sortOptions![0].orderBy} ${sortOptions![0].order} 
-    offset ${(paginationOptions.page - 1) * paginationOptions.limit} limit ${
-      paginationOptions.limit
-    } `,
-        '',
-      );
-      totalCountQuery = totalCountQuery.replace('*', 'Count(*)');
-    }
-    console.log('dodo', baseQuery);
+    const totalCountQuery = baseQuery
+      .replace(orderClause, '')
+      .replace('*', 'Count(*)');
+
     const products = await this.productRepository.query(baseQuery);
-
     const totalCount = await this.productRepository.query(totalCountQuery);
 
     return {
