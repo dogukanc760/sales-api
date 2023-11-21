@@ -14,7 +14,7 @@ export class Dictionaries extends EntityHelper {
   @PrimaryGeneratedColumn()
   id: number;
 
-  // birim türüne işaret eden benzersiz kod türüdür   maksimum 3 karakter olabilir
+  // birim türüne işaret eden benzersiz kod türüdür  - maksimum 3 karakter olabilir
   @Index()
   @Column({ type: String, nullable: false, length: 3 })
   unitCode: string | null;
