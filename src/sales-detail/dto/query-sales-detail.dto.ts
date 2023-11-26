@@ -68,3 +68,54 @@ export class QuerySalesDetailDto {
   @Type(() => SortSalesDetailDto)
   sort?: SortSalesDetailDto[] | null;
 }
+
+export class SortSalesDetailViewDto {
+  @ApiProperty()
+  @IsString()
+  orderBy: string | 'sales_created_at';
+
+  @ApiProperty()
+  @IsString()
+  order: string | 'desc';
+}
+
+export class QuerySalesDetailViewDto {
+  @ApiProperty({
+    required: false,
+  })
+  @Transform(({ value }) => (value ? Number(value) : 1))
+  @IsNumber()
+  @IsOptional()
+  page: number;
+
+  @ApiProperty({
+    required: false,
+  })
+  @Transform(({ value }) => (value ? Number(value) : 10))
+  @IsNumber()
+  @IsOptional()
+  limit: number;
+
+  @ApiProperty({ type: String, required: false })
+  @IsOptional()
+  @Transform(({ value }) =>
+    value
+      ? plainToInstance(FilterSalesDetailDto, JSON.parse(value))
+      : undefined,
+  )
+  @ValidateNested()
+  @Type(() => FilterSalesDetailDto)
+  filters?: FilterSalesDetailDto | null;
+
+  @ApiProperty({ type: String, required: false })
+  @IsOptional()
+  @Transform(({ value }) => {
+    console.log(JSON.parse(value));
+    return value
+      ? plainToInstance(SortSalesDetailViewDto, JSON.parse(value))
+      : undefined;
+  })
+  @ValidateNested({ each: true })
+  @Type(() => SortSalesDetailViewDto)
+  sort?: SortSalesDetailViewDto[] | null;
+}

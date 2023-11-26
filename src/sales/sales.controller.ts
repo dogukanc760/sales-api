@@ -17,6 +17,8 @@ import { QuerySalesDto } from './dto/query-sales.dto';
 import { UpdateSalesDto } from './dto/update-sales.dto';
 import { Sales } from './entities/sales.entity';
 import { SalesService } from './sales.service';
+import { CreateSalesDetailedDto } from './dto/create-sales-detailed.dto';
+import { QuerySalesDetailViewDto } from 'src/sales-detail/dto/query-sales-detail.dto';
 
 // @ApiBearerAuth()
 // @Roles(RoleEnum.admin)
@@ -50,7 +52,30 @@ export class SalesController {
     };
   }
 
-  @Get(':id')
+  @Get('/sales-detail')
+  public async getSalesView(
+    @Query() query: QuerySalesDetailViewDto,
+  ): Promise<any> {
+    const page = query?.page ?? 1;
+    let limit = query?.limit ?? 10;
+    if (limit > 50) {
+      limit = 50;
+    }
+    const salesDetail = await this.salesService.findManyWithViewPagination({
+      filterOptions: query?.filters,
+      sortOptions: query?.sort,
+      paginationOptions: {
+        page,
+        limit,
+      },
+    });
+    return {
+      totalCount: salesDetail.totalCount,
+      sales: salesDetail.salesDetail,
+    };
+  }
+
+  @Get('/get/:id')
   @HttpCode(HttpStatus.OK)
   findOne(@Param('id') id: string): Promise<NullableType<Sales>> {
     return this.salesService.findOne({ id: +id });
@@ -60,6 +85,19 @@ export class SalesController {
   @HttpCode(HttpStatus.CREATED)
   create(@Body() createSalesDto: CreateSalesDto): Promise<Sales> {
     return this.salesService.create(createSalesDto);
+  }
+
+  @Post('with-detail')
+  @HttpCode(HttpStatus.CREATED)
+  async createWithDetail(
+    @Body() createSalesDetailedDto: CreateSalesDetailedDto,
+  ): Promise<any> {
+    const result = await this.salesService.createWithDetail(
+      createSalesDetailedDto,
+    );
+    return {
+      sales: result,
+    };
   }
 
   @Patch(':id')
